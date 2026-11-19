@@ -150,6 +150,10 @@
     #
     # TODO: Fix the account that has a blank password
     #   (module: ansible.builtin.user  — set/lock the password)
+    - name: Lock the guestsvc account password
+      ansible.builtin.user:
+        name: guestsvc
+        password_lock: true
     #
     # TODO: Restrict the world-readable credentials file
     #   (module: ansible.builtin.file  mode: "0600"  + owner)
