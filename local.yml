@@ -68,6 +68,10 @@
     #
     # TODO: Remove the unauthorized scheduled job
     #   (module: ansible.builtin.file  state: absent  — or ansible.builtin.cron)
+    - name: Remove the unauthorized apt-mirror cron job
+      ansible.builtin.file:
+        path: /etc/cron.d/apt-mirror
+        state: absent
     #
     # TODO: Stop + disable + remove the unnecessary service
     #   (modules: ansible.builtin.service; ansible.builtin.package state: absent)
