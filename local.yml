@@ -187,5 +187,14 @@
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
     # TODO: Tighten DB access hosts; drop anonymous/stale accounts
+    - name: Remove remote root and anonymous local MySQL accounts
+      community.mysql.mysql_user:
+        name: "{{ item.name }}"
+        host: "{{ item.host }}"
+        state: absent
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      loop:
+        - { name: "root", host: "%" }
+        - { name: "", host: "localhost" }
     
     #   (module: community.mysql.mysql_user  — priv:, host:, login_unix_socket:)
