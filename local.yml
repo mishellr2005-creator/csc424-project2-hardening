@@ -119,6 +119,12 @@
     # ================= Domain B — Users / privilege escalation ===========
     # TODO: Remove or lock the unauthorized sudo account
     #   (module: ansible.builtin.user  state: absent  — or lock the password)
+    - name: Lock the monitor password and remove supplementary groups
+      ansible.builtin.user:
+        name: monitor
+        password_lock: true
+        groups: ""
+        append: false
     #
     # TODO: Remove the passwordless-sudo (NOPASSWD) rule
     #   (module: ansible.builtin.file  state: absent)
