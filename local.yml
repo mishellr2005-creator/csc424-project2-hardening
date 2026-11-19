@@ -157,6 +157,11 @@
     #
     # TODO: Restrict the world-readable credentials file
     #   (module: ansible.builtin.file  mode: "0600"  + owner)
+    - name: Restrict access to the application credentials file
+      ansible.builtin.file:
+        path: /opt/app/config.yml
+        state: file
+        mode: "0600"
 
     # ================== Domain C — Database least-privilege ==============
     # These need the community.mysql collection + pymysql. Install once:
