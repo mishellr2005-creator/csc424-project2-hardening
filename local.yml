@@ -19,18 +19,8 @@
   become: true
 
   tasks:
-
-    # ----- EXAMPLE (safe to keep) — shows the shape of a task -------------
-    - name: Example — make sure a package is present
-      ansible.builtin.package:
-        name: ca-certificates
-        state: present
-    # ---------------------------------------------------------------------
-
-    # ======================= Domain A — System / SSH =====================
-    # TODO: SSH — disallow root login and password auth, then restart ssh
-    #   (modules: ansible.builtin.lineinfile or blockinfile; ansible.builtin.service)
-    #    - name: Disable root login and password authentication for SSH
+  
+  - name: Disable root login and password authentication for SSH
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config.d/99-course.conf
         regexp: '^{{ item }}\s+'
@@ -40,42 +30,41 @@
         - PasswordAuthentication
       register: ssh_settings
 
-    - name: Validate SSH configuration before reloading
+  - name: Validate SSH configuration before reloading
       ansible.builtin.command: /usr/sbin/sshd -t
       changed_when: false
 
-    - name: Reload SSH when its settings change
+  - name: Reload SSH when its settings change
       ansible.builtin.service:
         name: ssh
         state: reloaded
       when: ssh_settings.changed
-    # TODO: Host firewall (UFW) — active, default-deny incoming, allow only SSH
-    #   (module: community.general.ufw, or ansible.builtin.command as a last resort)
-    - name: Allow incoming SSH on TCP port 22
+
+  - name: Allow incoming SSH on TCP port 22    
       community.general.ufw:
         rule: allow
         port: "22"
         proto: tcp
 
-    - name: Deny incoming connections by default
+  - name: Deny incoming connections by default
       community.general.ufw:
         direction: incoming
         policy: deny
 
-    - name: Enable the firewall
+  - name: Enable the firewall
       community.general.ufw:
         state: enabled
     #
     # TODO: Remove the unauthorized scheduled job
     #   (module: ansible.builtin.file  state: absent  — or ansible.builtin.cron)
-    - name: Remove the unauthorized apt-mirror cron job
+  - name: Remove the unauthorized apt-mirror cron job
       ansible.builtin.file:
         path: /etc/cron.d/apt-mirror
         state: absent
     #
     # TODO: Stop + disable + remove the unnecessary service
     #   (modules: ansible.builtin.service; ansible.builtin.package state: absent)
-    - name: Stop and disable the debugshell service
+  - name: Stop and disable the debugshell service
       ansible.builtin.service:
         name: debugshell.service
         state: stopped
@@ -83,12 +72,12 @@
     #
     # TODO: Install fail2ban and make sure it protects sshd
     #   (modules: ansible.builtin.package; ansible.builtin.copy/template; service)
-    - name: Install Fail2ban
+  - name: Install Fail2ban
       ansible.builtin.package:
         name: fail2ban
         state: present
 
-    - name: Enable the SSH jail using the system journal
+  - name: Enable the SSH jail using the system journal
       ansible.builtin.copy:
         dest: /etc/fail2ban/jail.d/sshd.local
         content: |
@@ -100,7 +89,7 @@
         mode: "0644"
       register: ssh_jail_config
 
-    - name: Enable Fail2ban and apply the SSH jail configuration
+  - name: Enable Fail2ban and apply the SSH jail configuration
       ansible.builtin.service:
         name: fail2ban
         enabled: true
@@ -108,7 +97,7 @@
     #
     # TODO: Fix the world-writable application directory
     #   (module: ansible.builtin.file  mode/owner/group)
-    - name: Set permissions on the application uploads directory
+  - name: Set permissions on the application uploads directory
       ansible.builtin.file:
         path: /srv/app/uploads
         state: directory
@@ -119,7 +108,7 @@
     # ================= Domain B — Users / privilege escalation ===========
     # TODO: Remove or lock the unauthorized sudo account
     #   (module: ansible.builtin.user  state: absent  — or lock the password)
-    - name: Lock the monitor password and remove supplementary groups
+  - name: Lock the monitor password and remove supplementary groups
       ansible.builtin.user:
         name: monitor
         password_lock: true
@@ -128,21 +117,21 @@
     #
     # TODO: Remove the passwordless-sudo (NOPASSWD) rule
     #   (module: ansible.builtin.file  state: absent)
-    - name: Require a password for sudo on the Ubuntu admin account
+  - name: Require a password for sudo on the Ubuntu admin account
       ansible.builtin.lineinfile:
         path: /etc/sudoers.d/90-cloud-init-users
         regexp: '^\s*ubuntu\s+ALL\s*='
         line: 'ubuntu ALL=(ALL) PASSWD: ALL'
         validate: '/usr/sbin/visudo -cf %s'
 
-    - name: Remove the unauthorized passwordless sudo rule
+  - name: Remove the unauthorized passwordless sudo rule
       ansible.builtin.file:
         path: /etc/sudoers.d/90-course-nopasswd
         state: absent
     #
     # TODO: Remove the unexpected SUID-root binary
     #   (module: ansible.builtin.file  state: absent  — or fix the mode)
-    - name: Remove the SUID bit from netcheck
+  - name: Remove the SUID bit from netcheck
       ansible.builtin.file:
         path: /usr/local/bin/netcheck
         state: file
@@ -150,14 +139,14 @@
     #
     # TODO: Fix the account that has a blank password
     #   (module: ansible.builtin.user  — set/lock the password)
-    - name: Lock the guestsvc account password
+  - name: Lock the guestsvc account password
       ansible.builtin.user:
         name: guestsvc
         password_lock: true
     #
     # TODO: Restrict the world-readable credentials file
     #   (module: ansible.builtin.file  mode: "0600"  + owner)
-    - name: Restrict access to the application credentials file
+  - name: Restrict access to the application credentials file
       ansible.builtin.file:
         path: /opt/app/config.yml
         state: file
@@ -169,7 +158,7 @@
     #     sudo apt-get install -y python3-pymysql
     #
     # TODO: Scope the webapp account to only what it needs (see the inventory)
-    - name: Limit the webapp account to its required database privileges
+  - name: Limit the webapp account to its required database privileges
       community.mysql.mysql_user:
         name: webapp
         host: "%"
@@ -178,7 +167,7 @@
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
     # TODO: Scope the reporting account to read-only on its DB
-    - name: Give the reporting account read-only access to shopdb
+  - name: Give the reporting account read-only access to shopdb
       community.mysql.mysql_user:
         name: reporting
         host: "%"
@@ -187,7 +176,7 @@
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
     # TODO: Tighten DB access hosts; drop anonymous/stale accounts
-    - name: Remove remote root and anonymous local MySQL accounts
+  - name: Remove remote root and anonymous local MySQL accounts
       community.mysql.mysql_user:
         name: "{{ item.name }}"
         host: "{{ item.host }}"
