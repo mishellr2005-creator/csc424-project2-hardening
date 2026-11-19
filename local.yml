@@ -142,6 +142,11 @@
     #
     # TODO: Remove the unexpected SUID-root binary
     #   (module: ansible.builtin.file  state: absent  — or fix the mode)
+    - name: Remove the SUID bit from netcheck
+      ansible.builtin.file:
+        path: /usr/local/bin/netcheck
+        state: file
+        mode: "u-s"
     #
     # TODO: Fix the account that has a blank password
     #   (module: ansible.builtin.user  — set/lock the password)
