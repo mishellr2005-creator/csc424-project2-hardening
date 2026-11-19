@@ -18,9 +18,8 @@
   connection: local
   become: true
 
-  tasks:
-  
-  - name: Disable root login and password authentication for SSH
+   tasks:
+    - name: Disable root login and password authentication for SSH
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config.d/99-course.conf
         regexp: '^{{ item }}\s+'
