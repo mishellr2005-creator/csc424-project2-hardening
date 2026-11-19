@@ -108,6 +108,13 @@
     #
     # TODO: Fix the world-writable application directory
     #   (module: ansible.builtin.file  mode/owner/group)
+    - name: Set permissions on the application uploads directory
+      ansible.builtin.file:
+        path: /srv/app/uploads
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
 
     # ================= Domain B — Users / privilege escalation ===========
     # TODO: Remove or lock the unauthorized sudo account
