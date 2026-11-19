@@ -51,6 +51,20 @@
       when: ssh_settings.changed
     # TODO: Host firewall (UFW) — active, default-deny incoming, allow only SSH
     #   (module: community.general.ufw, or ansible.builtin.command as a last resort)
+    - name: Allow incoming SSH on TCP port 22
+      community.general.ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+
+    - name: Deny incoming connections by default
+      community.general.ufw:
+        direction: incoming
+        policy: deny
+
+    - name: Enable the firewall
+      community.general.ufw:
+        state: enabled
     #
     # TODO: Remove the unauthorized scheduled job
     #   (module: ansible.builtin.file  state: absent  — or ansible.builtin.cron)
