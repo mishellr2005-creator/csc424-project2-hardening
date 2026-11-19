@@ -178,5 +178,14 @@
         login_unix_socket: /var/run/mysqld/mysqld.sock
         state: present
     # TODO: Scope the reporting account to read-only on its DB
+    - name: Give the reporting account read-only access to shopdb
+      community.mysql.mysql_user:
+        name: reporting
+        host: "%"
+        priv: "shopdb.*:SELECT"
+        append_privs: false
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        state: present
     # TODO: Tighten DB access hosts; drop anonymous/stale accounts
+    
     #   (module: community.mysql.mysql_user  — priv:, host:, login_unix_socket:)
