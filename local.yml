@@ -30,7 +30,25 @@
     # ======================= Domain A — System / SSH =====================
     # TODO: SSH — disallow root login and password auth, then restart ssh
     #   (modules: ansible.builtin.lineinfile or blockinfile; ansible.builtin.service)
-    #
+    #    - name: Disable root login and password authentication for SSH
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config.d/99-course.conf
+        regexp: '^{{ item }}\s+'
+        line: '{{ item }} no'
+      loop:
+        - PermitRootLogin
+        - PasswordAuthentication
+      register: ssh_settings
+
+    - name: Validate SSH configuration before reloading
+      ansible.builtin.command: /usr/sbin/sshd -t
+      changed_when: false
+
+    - name: Reload SSH when its settings change
+      ansible.builtin.service:
+        name: ssh
+        state: reloaded
+      when: ssh_settings.changed
     # TODO: Host firewall (UFW) — active, default-deny incoming, allow only SSH
     #   (module: community.general.ufw, or ansible.builtin.command as a last resort)
     #
