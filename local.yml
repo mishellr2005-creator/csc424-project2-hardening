@@ -75,6 +75,11 @@
     #
     # TODO: Stop + disable + remove the unnecessary service
     #   (modules: ansible.builtin.service; ansible.builtin.package state: absent)
+    - name: Stop and disable the debugshell service
+      ansible.builtin.service:
+        name: debugshell.service
+        state: stopped
+        enabled: false
     #
     # TODO: Install fail2ban and make sure it protects sshd
     #   (modules: ansible.builtin.package; ansible.builtin.copy/template; service)
