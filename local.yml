@@ -169,6 +169,14 @@
     #     sudo apt-get install -y python3-pymysql
     #
     # TODO: Scope the webapp account to only what it needs (see the inventory)
+    - name: Limit the webapp account to its required database privileges
+      community.mysql.mysql_user:
+        name: webapp
+        host: "%"
+        priv: "shopdb.*:SELECT,INSERT,UPDATE,DELETE"
+        append_privs: false
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        state: present
     # TODO: Scope the reporting account to read-only on its DB
     # TODO: Tighten DB access hosts; drop anonymous/stale accounts
     #   (module: community.mysql.mysql_user  — priv:, host:, login_unix_socket:)
