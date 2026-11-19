@@ -128,6 +128,17 @@
     #
     # TODO: Remove the passwordless-sudo (NOPASSWD) rule
     #   (module: ansible.builtin.file  state: absent)
+    - name: Require a password for sudo on the Ubuntu admin account
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/90-cloud-init-users
+        regexp: '^\s*ubuntu\s+ALL\s*='
+        line: 'ubuntu ALL=(ALL) PASSWD: ALL'
+        validate: '/usr/sbin/visudo -cf %s'
+
+    - name: Remove the unauthorized passwordless sudo rule
+      ansible.builtin.file:
+        path: /etc/sudoers.d/90-course-nopasswd
+        state: absent
     #
     # TODO: Remove the unexpected SUID-root binary
     #   (module: ansible.builtin.file  state: absent  — or fix the mode)
