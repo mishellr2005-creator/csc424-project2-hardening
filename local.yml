@@ -83,6 +83,28 @@
     #
     # TODO: Install fail2ban and make sure it protects sshd
     #   (modules: ansible.builtin.package; ansible.builtin.copy/template; service)
+    - name: Install Fail2ban
+      ansible.builtin.package:
+        name: fail2ban
+        state: present
+
+    - name: Enable the SSH jail using the system journal
+      ansible.builtin.copy:
+        dest: /etc/fail2ban/jail.d/sshd.local
+        content: |
+          [sshd]
+          enabled = true
+          backend = systemd
+        owner: root
+        group: root
+        mode: "0644"
+      register: ssh_jail_config
+
+    - name: Enable Fail2ban and apply the SSH jail configuration
+      ansible.builtin.service:
+        name: fail2ban
+        enabled: true
+        state: "{{ 'restarted' if ssh_jail_config.changed else 'started' }}"
     #
     # TODO: Fix the world-writable application directory
     #   (module: ansible.builtin.file  mode/owner/group)
